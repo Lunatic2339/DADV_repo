@@ -1,17 +1,26 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse, Http404
 from django.views import View
-
+from . import forms
+from . import models
 # Create your views here.
 
 def index(request):
-    context = {
-        "title": "myTitle",
-        "context": "myContent"
-    }
-    return render(request, 'main/index.html', context=context)
+    students = models.Student.objects.all()
+    return render(request, "main/add.html",{"students":students})
 
-
+def add(request):
+    if request.method == "POST":
+        form = forms.StudentForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect(add)
+    if request.method == "GET":
+        form = forms.StudentForm()
+        students = models.Student.objects.all()
+        return render(request, "main/add.html", {"form": form}, {"students": students})
+    else:
+        return HttpResponse("Invalid request method.", status=400)
 
 def hello1(request):
     return HttpResponse("<h1>Hello, World!</h1><h2>Well...</h2>")
@@ -49,3 +58,5 @@ class contentView(View):
     
     def post(self, request):
         return HttpResponse("POST request received")
+    
+

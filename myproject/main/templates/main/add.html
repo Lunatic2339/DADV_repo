@@ -1,12 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset = "UTF-8">
-    <title>table</title>
+    <title>Enter student</title>
 </head>
 <body>
-    <h2> registered students table </h2>
-        <table border="1">
+    <h1> Enter student information </h1>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Submit</button>
+    </form>
+    <table border="1">
         <tr>
             <th>Full Name</th>
             <th>Deaprtment</th>
