@@ -5,24 +5,6 @@
     <title>table</title>
 </head>
 <body>
-    <h2> registered students table </h2>
-        <table border="1">
-        <tr>
-            <th>Full Name</th>
-            <th>Deaprtment</th>
-            <th>Student ID</th>
-        </tr>
-        {% for student in students %}
-        <tr>
-            <td>{{ student.name }}</td>
-            <td>{{ student.department }}</td>
-            <td>{{ student.student_id }}</td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="3">No students are registered.</td>
-        </tr>
-        {% endfor %}
-    </table>
+    
 </body>
 </html>

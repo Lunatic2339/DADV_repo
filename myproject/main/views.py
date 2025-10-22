@@ -5,10 +5,6 @@ from . import forms
 from . import models
 # Create your views here.
 
-def index(request):
-    students = models.Student.objects.all()
-    return render(request, "main/add.html",{"students":students})
-
 def add(request):
     if request.method == "POST":
         form = forms.StudentForm(request.POST)
@@ -16,9 +12,9 @@ def add(request):
             form.save()
             return redirect(add)
     if request.method == "GET":
-        form = forms.StudentForm()
         students = models.Student.objects.all()
-        return render(request, "main/add.html", {"form": form}, {"students": students})
+        form = forms.StudentForm()
+        return render(request, "main/add.html", {"form": form, "students": students})
     else:
         return HttpResponse("Invalid request method.", status=400)
 

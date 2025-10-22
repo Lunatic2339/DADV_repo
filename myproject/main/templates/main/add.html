@@ -8,10 +8,11 @@
     <h1> Enter student information </h1>
     <form method="POST">
         {% csrf_token %}
-        {{ form.as_p }}
+        {{ form.as_ul }}
         <button type="submit">Submit</button>
     </form>
-    <table border="1">
+    <h2> registered students table </h2>
+        <table border="1">
         <tr>
             <th>Full Name</th>
             <th>Deaprtment</th>
