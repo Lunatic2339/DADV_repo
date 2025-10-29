@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>데이터 시각화 | {{ user_profile.display_name }}</title>
+    <style>
+        body {
+            background-color: #191414;
+            color: #FFFFFF;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        h1, h2 { color: #1DB954; text-align: center; margin: 0; padding: 10px 0; }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background-color: #282828;
+            border-bottom: 2px solid #1DB954;
+            flex-shrink: 0;
+        }
+        .header-controls a {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #535353;
+            color: #FFFFFF !important;
+            border-radius: 500px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        /* 메인 콘텐츠 영역: 헤더를 제외한 나머지 공간 분할 */
+        .main-content {
+            display: flex;
+            flex-grow: 1; 
+            overflow: hidden; 
+        }
+
+        /* 1. 왼쪽 영역: 트랙 목록 및 독립 스크롤 (50%) */
+        .track-list-container {
+            width: 50%; 
+            padding: 20px;
+            background-color: #121212;
+            overflow-y: auto; /* 독립 스크롤 */
+            flex-shrink: 0; 
+        }
+        .track-list { list-style: none; padding: 0; }
+        .track-list li { 
+            background-color: #333; 
+            padding: 10px; 
+            margin-bottom: 8px; 
+            border-radius: 4px; 
+            font-size: 0.95em; 
+        }
+        .track-list .ranking { 
+            font-weight: bold; 
+            color: #1DB954; 
+            width: 30px; 
+            text-align: right; 
+            margin-right: 10px;
+        }
+
+        /* 2. 오른쪽 영역: 차트 및 컨트롤 (50%) */
+        .visualization-container {
+            width: 50%; 
+            padding: 20px;
+            background-color: #191414;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-y: auto;
+        }
+        .chart-container {
+            width: 100%;
+            max-width: 600px; 
+            background-color: #282828;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+        .chart-controls {
+            width: 100%;
+            max-width: 600px;
+            background-color: #282828;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        .slider-label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        /* 볼륨바 스타일링 */
+        input[type=range] {
+            width: 100%;
+            margin: 10px 0;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <div class="page-header">
+        <h1>📊 {{ user_profile.display_name }}님의 음악 선호도 분석</h1>
+        <div class="header-controls">
+            <a href="{% url 'dashboard' %}">
+                대시보드로 돌아가기
+            </a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        
+        <div class="track-list-container">
+            <h2>🥇 Top Tracks (총 {{ total_tracks }}개)</h2>
+            <ul class="track-list">
+                {% for track in all_tracks %}
+                <li>
+                    <span class="ranking">{{ track.ranking }}.</span>
+                    <div>
+                        <strong>{{ track.name }}</strong>
+                        <br>
+                        <span style="color: #B3B3B3; font-size: 0.85em;">
+                            아티스트: {{ track.artist_name }} | 장르: {{ track.genre|default:'미지정' }} | 인기도: {{ track.popularity }}
+                        </span>
+                    </div>
+                </li>
+                {% empty %}
+                <li>데이터 로드에 실패했거나 청취 기록이 없습니다.</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="visualization-container">
+            
+            <div class="chart-controls">
+                <h2>인기도(Popularity) 분포 분석</h2>
+                
+                <label for="rank-slider" class="slider-label">
+                    순위 범위 (N): 상위 <span id="rank-value">{{ max_ranking|default:50 }}</span>개 트랙
+                </label>
+                
+                <input type="range" id="rank-slider" min="50" 
+                       max="{{ max_ranking|default:50 }}" value="50" step="1">
+                <small style="color: #B3B3B3;">최소 50개부터 최대 {{ max_ranking }}개까지 조절 가능합니다.</small>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="popularityChart"></canvas>
+            </div>
+            
+            <hr style="width: 80%; border-color: #333;">
+
+            <h2 style="margin-top: 20px;">선호 장르 분포</h2>
+            <div class="chart-container">
+                <canvas id="genreChart"></canvas>
+            </div>
+            
+            <h2 style="margin-top: 20px;">Top 10 선호 아티스트 (트랙 수 기준)</h2>
+            <div class="chart-container">
+                <canvas id="artistFocusChart" height="350"></canvas>
+            </div>
+            
+            <div id="genre-data" style="display: none;">
+                {{ top_genres | safe }}
+            </div>
+            <div id="popularity-initial-data" style="display: none;">
+                {{ initial_popularity_data | safe }}
+            </div>
+            <div id="artist-focus-data" style="display: none;">
+                {{ top_artists_focus | safe }}
+            </div>
+            
+        </div>
+    </div>
+
+    <script>
+        // ⭐⭐⭐ 핵심 수정: 작은따옴표 치환 로직 복구 (가장 안정적이었던 방식) ⭐⭐⭐
+        function loadAndParseData(elementId) {
+            let rawData = document.getElementById(elementId).textContent.trim();
+            
+            // views.py에서 json.dumps()를 사용하지 않았으므로, 
+            // Django가 출력한 작은따옴표(')를 JSON이 요구하는 큰따옴표(")로 치환합니다.
+            rawData = rawData.replace(/'/g, '"'); 
+            
+            try {
+                return JSON.parse(rawData);
+            } catch (e) {
+                console.error("!!! JSON 파싱 오류 발생 !!!", elementId, "오류:", e);
+                // 오류 발생 시 빈 배열 반환
+                return [];
+            }
+        }
+        
+        // --- 데이터 초기 로드 ---
+        const initialGenreData = loadAndParseData('genre-data');
+        const initialPopularityData = loadAndParseData('popularity-initial-data');
+        const initialArtistData = loadAndParseData('artist-focus-data');
+
+        // --- Chart.js 인스턴스 ---
+        const genreColors = ['#1DB954', '#1ED760', '#1AA64C', '#107038', '#0D572D', '#535353', '#737373', '#939393', '#B3B3B3', '#D3D3D3'];
+        
+        // 1. 장르 차트 초기화
+        if (initialGenreData.length > 0) {
+            new Chart(document.getElementById('genreChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: initialGenreData.map(d => d.genre),
+                    datasets: [{
+                        data: initialGenreData.map(d => d.count),
+                        backgroundColor: genreColors.slice(0, initialGenreData.length),
+                        borderColor: '#191414',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'right', labels: { color: 'white' } } }
+                }
+            });
+        }
+        
+        // 2. 인기도 차트 초기화
+        const popularityChartContext = document.getElementById('popularityChart').getContext('2d');
+        const popularityChart = new Chart(popularityChartContext, {
+            type: 'bar',
+            data: {
+                labels: initialPopularityData.map(d => d.bucket),
+                datasets: [{
+                    label: '트랙 수',
+                    data: initialPopularityData.map(d => d.count),
+                    backgroundColor: '#1DB954',
+                    borderColor: '#107038',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { 
+                        beginAtZero: true, 
+                        grid: { color: '#333' },
+                        ticks: { color: 'white' } 
+                    },
+                    x: { 
+                        grid: { display: false },
+                        ticks: { color: 'white' } 
+                    }
+                },
+                plugins: {
+                    title: { display: true, text: '상위 50개 트랙의 인기도 분포', color: 'white' },
+                    legend: { display: false }
+                }
+            }
+        });
+        
+        // 3. 아티스트 차트 초기화
+        if (initialArtistData.length > 0) {
+            const artistFocusContext = document.getElementById('artistFocusChart').getContext('2d');
+            
+            new Chart(artistFocusContext, {
+                type: 'bar',
+                data: {
+                    labels: initialArtistData.map(d => d.artist_name), 
+                    datasets: [{
+                        label: '트랙 개수',
+                        data: initialArtistData.map(d => d.count),
+                        backgroundColor: 'rgba(29, 185, 84, 0.8)',
+                        borderColor: 'rgba(29, 185, 84, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { 
+                            beginAtZero: true, 
+                            title: { display: true, text: '트랙 개수', color: 'white' },
+                            grid: { color: '#333' },
+                            ticks: { color: 'white' }
+                        },
+                        y: { 
+                            grid: { display: false },
+                            ticks: { color: 'white' } 
+                        }
+                    },
+                    plugins: {
+                        title: { display: true, text: 'Top 10 선호 아티스트', color: 'white' },
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+
+        // --- 4. 슬라이더 및 AJAX 갱신 로직 ---
+        const rankSlider = document.getElementById('rank-slider');
+        const rankValueSpan = document.getElementById('rank-value');
+
+        // AJAX로 인기도 데이터 갱신 함수 (Views.py의 get_popularity_data 호출)
+        function updatePopularityChart(rankLimit) {
+            fetch(`/visuals/popularity/?n=${rankLimit}`) 
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => {
+                    const popularityData = data.popularity_data;
+
+                    popularityChart.data.labels = popularityData.map(d => d.bucket);
+                    popularityChart.data.datasets[0].data = popularityData.map(d => d.count);
+                    
+                    popularityChart.options.plugins.title.text = `상위 ${rankLimit}개 트랙의 인기도 분포 (1-100)`;
+                    
+                    popularityChart.update();
+                })
+                .catch(error => console.error('Error fetching popularity data:', error));
+        }
+
+        // 슬라이더 이벤트 핸들러
+        rankSlider.addEventListener('input', function() {
+            const currentRank = this.value;
+            rankValueSpan.textContent = currentRank;
+            updatePopularityChart(currentRank); 
+        });
+        
+        // 초기 값 설정
+        rankValueSpan.textContent = rankSlider.value;
+    </script>
+</body>
+</html>

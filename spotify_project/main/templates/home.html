@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>DADV Project by Park Sunwoo</title>
+    <style>
+        body {
+            /* 검은색 배경 */
+            background-color: #191414; 
+            color: #FFFFFF;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            padding: 30px;
+            border-radius: 12px;
+            background-color: #282828; /* 배경보다 약간 밝은 회색 */
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 5px;
+            color: #1DB954; /* Spotify Green */
+        }
+        p {
+            font-size: 1.2em;
+            margin-bottom: 40px;
+        }
+        .logo {
+            width: 100px; /* 로고 크기 조절 */
+            height: auto;
+            margin-bottom: 20px;
+        }
+        .login-button {
+            /* 버튼 스타일 */
+            display: inline-block;
+            padding: 15px 30px;
+            background-color: #1DB954;
+            color: #FFFFFF;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1em;
+            border-radius: 500px; /* 둥근 버튼 */
+            transition: background-color 0.3s;
+            border: none;
+        }
+        .login-button:hover {
+            background-color: #108d44; /* 호버 시 색상 어둡게 */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>DADV Project by Park Sunwoo</h1>
+
+        
+        <img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" alt="Spotify Logo" class="logo">
+        
+        <p>Spotify를 통해 나만의 데이터 시각화 분석을 시작하세요.</p>
+        
+        <a href="{% url 'spotify_login' %}" class="login-button">
+            Spotify로 로그인
+        </a>
+    </div>
+</body>
+</html>

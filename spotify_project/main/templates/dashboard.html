@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>사용자 대시보드 | Spotify DADV</title>
+    <style>
+        .preferences a {
+            /* ⭐⭐ 버튼 스타일 전면 수정 ⭐⭐ */
+            display: inline-block;
+            
+            /* 글자색을 밝은 흰색으로 설정 */
+            color: #FFFFFF !important; 
+            
+            /* Spotify 기본 녹색 */
+            background-color: #1DB954; 
+            
+            padding: 10px 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            text-decoration: none; /* 밑줄 제거 */
+            border-radius: 500px; /* 둥근 모양 */
+            
+            /* 인터랙티브 효과를 위한 준비 */
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .preferences a:hover {
+            /* ⭐⭐ 마우스 오버 시 (인터랙티브) 효과 ⭐⭐ */
+            background-color: #1ed760; /* 더 밝은 녹색으로 변경 */
+            transform: scale(1.02); /* 버튼이 살짝 커지는 효과 */
+        }
+
+        /* 기존에 preferences 안에 있는 링크에 파란색이 적용되었다면 이를 덮어씁니다. */
+        .preferences a:visited, .preferences a:link {
+            color: #FFFFFF !important;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #191414; /* Spotify Background */
+            color: #FFFFFF;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background-color: #282828;
+            border-bottom: 2px solid #1DB954;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+        .user-info img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 15px;
+        }
+        .preferences {
+            /* 추후 선호 아티스트/장르가 들어갈 영역 */
+            color: #B3B3B3;
+            font-size: 0.9em;
+        }
+        main {
+            padding: 40px 20px;
+        }
+        h2 {
+            color: #1DB954;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .track-list {
+            list-style: none;
+            padding: 0;
+        }
+        .track-list li {
+            background-color: #333;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+        }
+        .track-list img {
+            width: 40px;
+            height: 40px;
+            margin-right: 15px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="user-info">
+            <img src="{{ user_profile.images.0.url|default:'https://via.placeholder.com/50' }}" alt="Profile Image">
+            <span>환영합니다, <strong>{{ user_profile.display_name }}</strong>님!</span>
+        </div>
+        <div class="preferences">
+            <a href="{% url 'visuals' %}" class="preferences-button"
+            style="padding: 10px 20px; font-size: 0.9em; background-color: #535353; border-radius: 4px;">
+                내 정보 시각화 보기
+            </a>
+        </div>
+    </header>
+
+    <main>
+        <h2>가장 많이 들은 Top 5 트랙</h2>
+        <ol class="track-list">
+            {% for track in top_tracks %}
+            <li>
+                <img src="{{ track.album.images.0.url|default:'https://via.placeholder.com/40' }}" alt="Album Art">
+                <div>
+                    <strong>{{ forloop.counter }}. {{ track.name }}</strong>
+                    <br>
+                    <span>아티스트: {{ track.artists.0.name }}</span>
+                </div>
+            </li>
+            {% empty %}
+            <li>최근 청취 기록이 없거나 데이터를 불러올 수 없습니다.</li>
+            {% endfor %}
+        </ol>
+    </main>
+</body>
+</html>

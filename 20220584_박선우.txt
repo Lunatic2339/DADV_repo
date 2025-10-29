@@ -1,0 +1,116 @@
+#views.py
+
+from django.shortcuts import render, redirect
+from django.http import HttpResponse, JsonResponse, Http404
+from django.views import View
+from . import forms
+from . import models
+# Create your views here.
+
+def add(request):
+    if request.method == "POST":
+        form = forms.StudentForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect(add)
+    if request.method == "GET":
+        students = models.Student.objects.all()
+        form = forms.StudentForm()
+        return render(request, "main/add.html", {"form": form, "students": students})
+    else:
+        return HttpResponse("Invalid request method.", status=400)
+
+#urls.py
+
+from django.urls import path
+from . import views # . == this path
+urlpatterns  = [ 
+    path('', views.add),
+]
+
+#add.html
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset = "UTF-8">
+    <title>Enter student</title>
+</head>
+<body>
+    <h1> Enter student information </h1>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_ul }}
+        <button type="submit">Submit</button>
+    </form>
+    <h2> registered students table </h2>
+        <table border="1">
+        <tr>
+            <th>Full Name</th>
+            <th>Deaprtment</th>
+            <th>Student ID</th>
+        </tr>
+        {% for student in students %}
+        <tr>
+            <td>{{ student.name }}</td>
+            <td>{{ student.department }}</td>
+            <td>{{ student.student_id }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="3">No students are registered.</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
+
+#models.py
+from django.db import models
+
+# Create your models here.
+
+class Author(models.Model): # 저자테이블
+    name = models.CharField(max_length=100)
+    birth_date = models.DateField(null=True, blank=True)
+    def __str__(self):
+        return self.name # 관리화면에서저자의이름을표시
+    
+class Book(models.Model):# 책테이블
+    title=models.CharField(max_length=200)
+    author=models.ForeignKey(Author, on_delete=models.CASCADE)
+    published_date=models.DateField()
+    isbn=models.CharField(max_length=13, unique=True)
+    def __str__(self):
+        return self.title # 관리화면에서책의제목을표시하기위한문자열
+    
+class Student(models.Model): # 학생테이블
+    name = models.CharField(max_length=100)
+    department = models.CharField(max_length=100)
+    student_id = models.CharField(max_length=20, unique=True)
+
+    # objectwise fuction
+    def __str__(self):
+        return f'{self.name} ({self.student_id})'
+    
+
+    # tablewise function / classwise
+    @classmethod
+    def get_table():
+        return Student.objects.all()
+    
+
+    # utility function
+    @staticmethod
+    def anonymous(self):
+        return 
+
+#forms.py 
+
+from django import forms
+from .models import Student
+
+class StudentForm(forms.ModelForm):
+    class Meta:
+        model = Student
+        fields = ['name', 'department', 'student_id']

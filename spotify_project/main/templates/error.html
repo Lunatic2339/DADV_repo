@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>오류 발생</title>
+</head>
+<body>
+    <h1>오류가 발생했습니다!</h1>
+    <p>오류 내용: {{ error }}</p> 
+    <p>로그인 페이지로 돌아가 다시 시도해 보세요.</p>
+    <p><a href="{% url 'spotify_login' %}">Spotify 로그인으로 이동</a></p>
+</body>
+</html>
