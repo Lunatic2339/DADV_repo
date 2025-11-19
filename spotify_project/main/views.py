@@ -1,16 +1,15 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse, JsonResponse, Http404
-from django.views import View
+from django.http import HttpResponse, JsonResponse
 from django.conf import settings
 from django.utils import timezone
-from django.contrib.auth import authenticate, login 
+from django.contrib.auth import login 
 from django.contrib.auth.models import User # Django 기본 User 모델
 from django.contrib.auth.decorators import login_required
-import json
+
 from . import forms
 from . import models
 from . import spotify 
-from .models import SpotifyToken, Artist, Track
+from .models import SpotifyToken, Track
 
 from datetime import timedelta
 import spotipy
@@ -20,12 +19,12 @@ from collections import Counter
 
 # Create your views here.
 
-def add(request):
+def home_view(request):
     if request.method == "POST":
         form = forms.ArtistForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect(add)
+            return redirect('home')
     if request.method == "GET":
         artists = models.Artist.objects.all()
         form = forms.ArtistForm()
@@ -146,7 +145,6 @@ def visuals_view(request):
         # 오류 발생 시 사용자에게 친절한 화면을 보여주거나 로그인 페이지로 리다이렉트
         return render(request, 'home.html', {'error': f'시각화 데이터 로딩 중 오류 발생: {e}'})
 
-
 @login_required
 def get_popularity_data(request):
     """
@@ -197,9 +195,6 @@ def spotify_login(request):
     request.session['spotify_auth_state'] = request.session.session_key
     
     return redirect(auth_url)
-
-# 2. 콜백 엔드포인트
-# main/views.py
 
 def spotify_callback(request):
     
@@ -263,7 +258,6 @@ def spotify_callback(request):
         print("❌ DEBUG: login(request, user) 호출 후에도 사용자 인증 실패!")
     # 6. 최종적으로 /dashboard 경로로 리다이렉트 (주소창 변경 목적)
     return redirect('/dashboard')
-
 
 # 헬퍼 함수: Access Token을 갱신하고 DB를 업데이트
 def refresh_spotify_token(token_obj):

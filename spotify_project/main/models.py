@@ -40,7 +40,6 @@ class Artist(models.Model):
     def __str__(self):
         return self.name
     
-
 class Track(models.Model):
     """
     사용자의 Top Track 데이터와 커스텀 순위를 저장하는 핵심 모델.
@@ -62,11 +61,9 @@ class Track(models.Model):
     # track duration (길이 정보)
     duration_ms = models.IntegerField(null=True, blank=True)
     
-    # ⭐⭐⭐ 새로운 필드: track genre ⭐⭐⭐
     # 단일 장르 또는 콤마로 구분된 여러 장르를 저장하기 위해 TextField 사용
     genre = models.CharField(
-        max_length=100,  # ⭐ 100자 정도면 단일 장르 이름을 저장하기에 충분합니다.
-        default='', 
+        max_length=100,
         blank=True, 
         help_text="Track의 대표 장르 (Artist의 첫 번째 장르)"
     )
@@ -106,6 +103,9 @@ class Track(models.Model):
 
     def __str__(self):
         return f"[{self.ranking}] {self.name} ({self.genre})"
+
+
+
 
 class SpotifyToken(models.Model):
     # Django의 사용자 모델과 1:1 연결. 실제 환경에서는 User 모델 사용 권장.

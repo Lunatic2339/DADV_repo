@@ -2,7 +2,7 @@ from django.urls import path, include
 from . import views
 
 urlpatterns = [
-    path('', views.add, name='home'),
+    path('', views.home_view, name='home'),
     path('spotify/login', views.spotify_login, name='spotify_login'),
     path('spotify/callback', views.spotify_callback, name='spotify_callback'),
     path('playlists', views.get_playlists, name='get_playlists'),
